@@ -130,7 +130,7 @@ var APP_DATA = {
     {
       "id": "6-go-to-station-5",
       "name": "Go To Station 5",
-      "youtubeId": "wjfRAZUnonI", // Fixed subtle letter typo from wjfRAZUnonl -> wfsRAZUnonI to match info hotspot URL
+      "youtubeId": "wjfRAZUnonI",
       "videoYaw": 2.7620155776811437,
       "videoPitch": 0.36283380198627313,
       "levels": [
