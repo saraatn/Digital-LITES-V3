@@ -20,7 +20,14 @@ var APP_DATA = {
         { "yaw": -1.3607726706367043, "pitch": 0.575271838059594, "rotation": 0, "target": "1-" },
         { "yaw": 0.7882284568284366, "pitch": 0.35269947965878856, "rotation": 0, "target": "10-" }
       ],
-      "infoHotspots": []
+      "infoHotspots": [
+        {
+          "yaw": 2.918,
+          "pitch": 0.1,
+          "title": "Station 1 Information",
+          "text": "Welcome to Station 1. This is the entry overview point of the lab setup."
+        }
+      ]
     },
     {
       "id": "1-",
@@ -62,7 +69,14 @@ var APP_DATA = {
         { "yaw": -1.6737981906097996, "pitch": 0.5335121945777672, "rotation": 0, "target": "3-" },
         { "yaw": 1.7543618371851375, "pitch": 0.49855897189223697, "rotation": 0, "target": "1-" }
       ],
-      "infoHotspots": []
+      "infoHotspots": [
+        {
+          "yaw": 2.807,
+          "pitch": 0.1,
+          "title": "Station 2 Information",
+          "text": "Details and processing metrics for Station 2 are managed here."
+        }
+      ]
     },
     {
       "id": "3-",
@@ -103,7 +117,14 @@ var APP_DATA = {
         { "yaw": -1.792591510735397, "pitch": 0.6888885744645705, "rotation": 0, "target": "5-go-to-station-4" },
         { "yaw": 0.8937882386317604, "pitch": 0.6239429988084098, "rotation": 0, "target": "3-" }
       ],
-      "infoHotspots": []
+      "infoHotspots": [
+        {
+          "yaw": 2.639,
+          "pitch": -0.1,
+          "title": "Station 3 Information",
+          "text": "Overview of operations and standard protocols at Station 3."
+        }
+      ]
     },
     {
       "id": "5-go-to-station-4",
@@ -125,7 +146,14 @@ var APP_DATA = {
         { "yaw": -0.5723605425528717, "pitch": 0.7431369774993613, "rotation": 0, "target": "6-go-to-station-5" },
         { "yaw": 1.1456690376655487, "pitch": 0.6704550038988266, "rotation": 0, "target": "4-go-to-station-3" }
       ],
-      "infoHotspots": []
+      "infoHotspots": [
+        {
+          "yaw": 2.801,
+          "pitch": 0.0,
+          "title": "Station 4 Information",
+          "text": "Inventory logistics and scanning workflow monitored at Station 4."
+        }
+      ]
     },
     {
       "id": "6-go-to-station-5",
@@ -147,7 +175,14 @@ var APP_DATA = {
         { "yaw": -2.006609759454715, "pitch": 0.44546275918288103, "rotation": 0, "target": "7-" },
         { "yaw": -0.29651134259847645, "pitch": 0.5608486540108402, "rotation": 0, "target": "5-go-to-station-4" }
       ],
-      "infoHotspots": []
+      "infoHotspots": [
+        {
+          "yaw": 2.830,
+          "pitch": 0.2,
+          "title": "Station 5 Information",
+          "text": "Quality assurance checking area configuration parameters."
+        }
+      ]
     },
     {
       "id": "7-",
@@ -188,7 +223,14 @@ var APP_DATA = {
         { "yaw": -2.040995929444369, "pitch": 0.5000174686690322, "rotation": 0, "target": "9-6-7" },
         { "yaw": 1.0499407607976199, "pitch": 0.5941194075909575, "rotation": 0, "target": "7-" }
       ],
-      "infoHotspots": []
+      "infoHotspots": [
+        {
+          "yaw": 3.062,
+          "pitch": 0.2,
+          "title": "Station 6 Information",
+          "text": "Final integration loop system prior to central hub delivery."
+        }
+      ]
     },
     {
       "id": "9-6-7",
