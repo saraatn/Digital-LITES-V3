@@ -156,7 +156,27 @@
       }
     });
   });
-
+// ==========================================================================
+  // PART 2 & 3: 2D FLOOR PLAN MAP INTERACTION LOOP
+  // ==========================================================================
+  const mapDots = document.querySelectorAll('.map-dot');
+  mapDots.forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      const targetSceneId = this.getAttribute('data-scene');
+      
+      // Look through Marzipano's active scenes array for a match
+      const targetScene = scenes.find(function(s) {
+        return s.data.id === targetSceneId;
+      });
+      
+      // If found, smoothly warp the viewer to that station
+      if (targetScene) {
+        switchScene(targetScene);
+      } else {
+        console.warn("Scene ID tracking mismatch: " + targetSceneId);
+      }
+    });
+  });
   // DOM elements for view controls.
   var viewUpElement = document.querySelector('#viewUp');
   var viewDownElement = document.querySelector('#viewDown');
