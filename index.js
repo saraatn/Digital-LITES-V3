@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,7 +81,7 @@
     var limiter = Marzipano.RectilinearView.limit.traditional(data.faceSize, 100*Math.PI/180, 120*Math.PI/180);
     var view = new Marzipano.RectilinearView(data.initialViewParameters, limiter);
 
-   var scene = viewer.createScene({
+    var scene = viewer.createScene({
       source: source,
       geometry: geometry,
       view: view,
@@ -89,43 +89,22 @@
     });
 
     // --- ADD THIS PIECE FOR YOUR VIDEO HOTSPOTS ---
-    // Check if the current scene data has a youtubeId defined
     if (data.youtubeId) {
-      // Create the video camera icon element
       var videoIcon = document.createElement('div');
       videoIcon.classList.add('video-hotspot');
       videoIcon.innerHTML = '🎥'; 
 
-      // Add the click action to open the modal
       videoIcon.addEventListener('click', function() {
         var modal = document.getElementById('videoModal');
         var iframe = document.getElementById('panoVideo');
-        // Grab the youtube ID straight from this scene's data!
         iframe.src = "https://www.youtube.com/embed/" + data.youtubeId + "?enablejsapi=1&autoplay=1";
         modal.style.display = 'flex';
       });
 
-     // Place it using the yaw/pitch coordinates from this scene's data
       scene.hotspotContainer().createHotspot(videoIcon, { yaw: data.videoYaw, pitch: data.videoPitch });
     }
     // ----------------------------------------------
 
-    // Marzipano's original closing code (Make sure these lines look EXACTLY like this):
-    return {
-      data: data,
-      scene: scene,
-      view: view
-    };
-  }); // <-- Check this line! It must close the loop before the next section begins.
-
-    // This is Marzipano's original closing code, keep it right below!
-    return {
-      data: data,
-      scene: scene,
-      view: view
-    };
-  });
-  
     // Create link hotspots.
     data.linkHotspots.forEach(function(hotspot) {
       var element = createLinkHotspotElement(hotspot);
@@ -188,13 +167,13 @@
     var el = document.querySelector('#sceneList .scene[data-id="' + scene.data.id + '"]');
     el.addEventListener('click', function() {
       switchScene(scene);
-      // On mobile, hide scene list after selecting a scene.
       if (document.body.classList.contains('mobile')) {
         hideSceneList();
       }
     });
   });
-// ==========================================================================
+
+  // ==========================================================================
   // PART 2 & 3: 2D FLOOR PLAN MAP INTERACTION LOOP
   // ==========================================================================
   const mapDots = document.querySelectorAll('.map-dot');
@@ -202,12 +181,10 @@
     dot.addEventListener('click', function() {
       const targetSceneId = this.getAttribute('data-scene');
       
-      // Look through Marzipano's active scenes array for a match
       const targetScene = scenes.find(function(s) {
         return s.data.id === targetSceneId;
       });
       
-      // If found, smoothly warp the viewer to that station
       if (targetScene) {
         switchScene(targetScene);
       } else {
@@ -215,6 +192,7 @@
       }
     });
   });
+
   // DOM elements for view controls.
   var viewUpElement = document.querySelector('#viewUp');
   var viewDownElement = document.querySelector('#viewDown');
@@ -248,6 +226,12 @@
     updateSceneName(scene);
     updateSceneList(scene);
   }
+
+  // Keep track of the currently loaded scene globally for your tracker engine below
+  window.currentScene = null;
+  viewer.addEventListener('sceneChange', function() {
+    window.currentScene = viewer.scene();
+  });
 
   function updateSceneName(scene) {
     sceneNameElement.innerHTML = sanitize(scene.data.name);
@@ -303,234 +287,8 @@
   }
 
   function createLinkHotspotElement(hotspot) {
-
-    // Create wrapper element to hold icon and tooltip.
     var wrapper = document.createElement('div');
     wrapper.classList.add('hotspot');
     wrapper.classList.add('link-hotspot');
 
-    // Create image element.
-    var icon = document.createElement('img');
-    icon.src = 'img/link.png';
-    icon.classList.add('link-hotspot-icon');
-
-    // Set rotation transform.
-    var transformProperties = [ '-ms-transform', '-webkit-transform', 'transform' ];
-    for (var i = 0; i < transformProperties.length; i++) {
-      var property = transformProperties[i];
-      icon.style[property] = 'rotate(' + hotspot.rotation + 'rad)';
-    }
-
-    // Add click event handler.
-    wrapper.addEventListener('click', function() {
-      switchScene(findSceneById(hotspot.target));
-    });
-
-    // Prevent touch and scroll events from reaching the parent element.
-    // This prevents the view control logic from interfering with the hotspot.
-    stopTouchAndScrollEventPropagation(wrapper);
-
-    // Create tooltip element.
-    var tooltip = document.createElement('div');
-    tooltip.classList.add('hotspot-tooltip');
-    tooltip.classList.add('link-hotspot-tooltip');
-    tooltip.innerHTML = findSceneDataById(hotspot.target).name;
-
-    wrapper.appendChild(icon);
-    wrapper.appendChild(tooltip);
-
-    return wrapper;
-  }
-
-  function createInfoHotspotElement(hotspot) {
-
-    // Create wrapper element to hold icon and tooltip.
-    var wrapper = document.createElement('div');
-    wrapper.classList.add('hotspot');
-    wrapper.classList.add('info-hotspot');
-
-    // Create hotspot/tooltip header.
-    var header = document.createElement('div');
-    header.classList.add('info-hotspot-header');
-
-    // Create image element.
-    var iconWrapper = document.createElement('div');
-    iconWrapper.classList.add('info-hotspot-icon-wrapper');
-    var icon = document.createElement('img');
-    icon.src = 'img/info.png';
-    icon.classList.add('info-hotspot-icon');
-    iconWrapper.appendChild(icon);
-
-    // Create title element.
-    var titleWrapper = document.createElement('div');
-    titleWrapper.classList.add('info-hotspot-title-wrapper');
-    var title = document.createElement('div');
-    title.classList.add('info-hotspot-title');
-    title.innerHTML = hotspot.title;
-    titleWrapper.appendChild(title);
-
-    // Create close element.
-    var closeWrapper = document.createElement('div');
-    closeWrapper.classList.add('info-hotspot-close-wrapper');
-    var closeIcon = document.createElement('img');
-    closeIcon.src = 'img/close.png';
-    closeIcon.classList.add('info-hotspot-close-icon');
-    closeWrapper.appendChild(closeIcon);
-
-    // Construct header element.
-    header.appendChild(iconWrapper);
-    header.appendChild(titleWrapper);
-    header.appendChild(closeWrapper);
-
-    // Create text element.
-    var text = document.createElement('div');
-    text.classList.add('info-hotspot-text');
-    text.innerHTML = hotspot.text;
-
-    // Place header and text into wrapper element.
-    wrapper.appendChild(header);
-    wrapper.appendChild(text);
-
-    // Create a modal for the hotspot content to appear on mobile mode.
-    var modal = document.createElement('div');
-    modal.innerHTML = wrapper.innerHTML;
-    modal.classList.add('info-hotspot-modal');
-    document.body.appendChild(modal);
-
-    var toggle = function() {
-      wrapper.classList.toggle('visible');
-      modal.classList.toggle('visible');
-    };
-
-    // Show content when hotspot is clicked.
-    wrapper.querySelector('.info-hotspot-header').addEventListener('click', toggle);
-
-    // Hide content when close icon is clicked.
-    modal.querySelector('.info-hotspot-close-wrapper').addEventListener('click', toggle);
-
-    // Prevent touch and scroll events from reaching the parent element.
-    // This prevents the view control logic from interfering with the hotspot.
-    stopTouchAndScrollEventPropagation(wrapper);
-
-    return wrapper;
-  }
-
-  // Prevent touch and scroll events from reaching the parent element.
-  function stopTouchAndScrollEventPropagation(element, eventList) {
-    var eventList = [ 'touchstart', 'touchmove', 'touchend', 'touchcancel',
-                      'wheel', 'mousewheel' ];
-    for (var i = 0; i < eventList.length; i++) {
-      element.addEventListener(eventList[i], function(event) {
-        event.stopPropagation();
-      });
-    }
-  }
-
-  function findSceneById(id) {
-    for (var i = 0; i < scenes.length; i++) {
-      if (scenes[i].data.id === id) {
-        return scenes[i];
-      }
-    }
-    return null;
-  }
-
-  function findSceneDataById(id) {
-    for (var i = 0; i < data.scenes.length; i++) {
-      if (data.scenes[i].id === id) {
-        return data.scenes[i];
-      }
-    }
-    return null;
-  }
-
-  // Display the initial scene.
-  switchScene(scenes[0]);
-
-)();
-// ==========================================================================
-// TRACKING ENGINE: PROGRESS METRICS & VIDEO COMPLETION HANDLER
-// ==========================================================================
-
-// Track completed main stations
-const completedStations = new Set();
-const totalRequiredStations = 7;
-
-// Explicit mapping matching your Marzipano generated IDs
-const stationMap = {
-  "0-go-to-station-1": "Station 1",
-  "2-go-to-station-2": "Station 2",
-  "4-go-to-station-3": "Station 3",
-  "5-go-to-station-4": "Station 4",
-  "6-go-to-station-5": "Station 5",
-  "8-go-to-station-6": "Station 6",
-  "11-nexus": "Nexus"
-};
-
-// Function to update visual progress markers
-function updateSimulationProgress() {
-  const completedCount = completedStations.size;
-  const percentage = Math.round((completedCount / totalRequiredStations) * 100);
-  
-  // Update the DOM progress elements
-  document.getElementById('progress-bar').style.width = percentage + '%';
-  document.getElementById('progress-text').innerText = percentage + '% (' + completedCount + '/7 Stations)';
-  
-  // Optional flag: Trigger an event when complete
-  if (completedCount === totalRequiredStations) {
-    document.getElementById('progress-text').innerText = "100% Completed! Simulator Mastered.";
-  }
-}
-
-// Global Observer: Catch dynamically created video element rendering events
-const videoObserver = new MutationObserver(function(mutations) {
-  mutations.forEach(function(mutation) {
-    mutation.addedNodes.forEach(function(node) {
-      // Check if added element is or contains a video file tag
-      const videoElement = node.nodeName === 'VIDEO' ? node : (node.querySelector ? node.querySelector('video') : null);
-      
-      if (videoElement) {
-        // Intercept when the video runs completely to the final millisecond
-        videoElement.addEventListener('ended', function() {
-          // Identify which scene the player is actively standing in
-          if (currentScene && stationMap[currentScene.data.id]) {
-            const currentStationName = stationMap[currentScene.data.id];
-            
-            if (!completedStations.has(currentStationName)) {
-              completedStations.add(currentStationName);
-              updateSimulationProgress();
-              console.log("Awarded progress points for completing video content at: " + currentStationName);
-            }
-          }
-        });
-      }
-    });
-  });
-});
-
-// Start monitoring the body container for dynamic Marzipano modal injects
-videoObserver.observe(document.body, { childList: true, subtree: true });
-
-// --- DYNAMIC VIDEO HOTSPOT CODE ---
-
-function createVideoHotspot(scene, yaw, pitch, youtubeId) {
-  var videoIcon = document.createElement('div');
-  videoIcon.classList.add('video-hotspot');
-  videoIcon.innerHTML = '🎥'; 
-
-  videoIcon.addEventListener('click', function() {
-    var modal = document.getElementById('videoModal');
-    var iframe = document.getElementById('panoVideo');
-    iframe.src = "https://www.youtube.com/embed/" + youtubeId + "?enablejsapi=1&autoplay=1";
-    modal.style.display = 'flex';
-  });
-
-  scene.hotspotContainer().createHotspot(videoIcon, { yaw: yaw, pitch: pitch });
-}
-
-function closeVideo() {
-  var modal = document.getElementById('videoModal');
-  var iframe = document.getElementById('panoVideo');
-  modal.style.display = 'none';
-  iframe.src = ''; 
-}
+    var icon = document.createElement
