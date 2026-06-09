@@ -81,13 +81,43 @@
     var limiter = Marzipano.RectilinearView.limit.traditional(data.faceSize, 100*Math.PI/180, 120*Math.PI/180);
     var view = new Marzipano.RectilinearView(data.initialViewParameters, limiter);
 
-    var scene = viewer.createScene({
+   var scene = viewer.createScene({
       source: source,
       geometry: geometry,
       view: view,
       pinFirstLevel: true
     });
 
+    // --- ADD THIS PIECE FOR YOUR VIDEO HOTSPOTS ---
+    // Check if the current scene data has a youtubeId defined
+    if (data.youtubeId) {
+      // Create the video camera icon element
+      var videoIcon = document.createElement('div');
+      videoIcon.classList.add('video-hotspot');
+      videoIcon.innerHTML = '🎥'; 
+
+      // Add the click action to open the modal
+      videoIcon.addEventListener('click', function() {
+        var modal = document.getElementById('videoModal');
+        var iframe = document.getElementById('panoVideo');
+        // Grab the youtube ID straight from this scene's data!
+        iframe.src = "https://www.youtube.com/embed/" + data.youtubeId + "?enablejsapi=1&autoplay=1";
+        modal.style.display = 'flex';
+      });
+
+      // Place it using the yaw/pitch coordinates from this scene's data
+      scene.hotspotContainer().createHotspot(videoIcon, { yaw: data.videoYaw, pitch: data.videoPitch });
+    }
+    // ----------------------------------------------
+
+    // This is Marzipano's original closing code, keep it right below!
+    return {
+      data: data,
+      scene: scene,
+      view: view
+    };
+  });
+  
     // Create link hotspots.
     data.linkHotspots.forEach(function(hotspot) {
       var element = createLinkHotspotElement(hotspot);
@@ -410,3 +440,89 @@
   switchScene(scenes[0]);
 
 })();
+// ==========================================================================
+// TRACKING ENGINE: PROGRESS METRICS & VIDEO COMPLETION HANDLER
+// ==========================================================================
+
+// Track completed main stations
+const completedStations = new Set();
+const totalRequiredStations = 7;
+
+// Explicit mapping matching your Marzipano generated IDs
+const stationMap = {
+  "0-go-to-station-1": "Station 1",
+  "2-go-to-station-2": "Station 2",
+  "4-go-to-station-3": "Station 3",
+  "5-go-to-station-4": "Station 4",
+  "6-go-to-station-5": "Station 5",
+  "8-go-to-station-6": "Station 6",
+  "11-nexus": "Nexus"
+};
+
+// Function to update visual progress markers
+function updateSimulationProgress() {
+  const completedCount = completedStations.size;
+  const percentage = Math.round((completedCount / totalRequiredStations) * 100);
+  
+  // Update the DOM progress elements
+  document.getElementById('progress-bar').style.width = percentage + '%';
+  document.getElementById('progress-text').innerText = percentage + '% (' + completedCount + '/7 Stations)';
+  
+  // Optional flag: Trigger an event when complete
+  if (completedCount === totalRequiredStations) {
+    document.getElementById('progress-text').innerText = "100% Completed! Simulator Mastered.";
+  }
+}
+
+// Global Observer: Catch dynamically created video element rendering events
+const videoObserver = new MutationObserver(function(mutations) {
+  mutations.forEach(function(mutation) {
+    mutation.addedNodes.forEach(function(node) {
+      // Check if added element is or contains a video file tag
+      const videoElement = node.nodeName === 'VIDEO' ? node : (node.querySelector ? node.querySelector('video') : null);
+      
+      if (videoElement) {
+        // Intercept when the video runs completely to the final millisecond
+        videoElement.addEventListener('ended', function() {
+          // Identify which scene the player is actively standing in
+          if (currentScene && stationMap[currentScene.data.id]) {
+            const currentStationName = stationMap[currentScene.data.id];
+            
+            if (!completedStations.has(currentStationName)) {
+              completedStations.add(currentStationName);
+              updateSimulationProgress();
+              console.log("Awarded progress points for completing video content at: " + currentStationName);
+            }
+          }
+        });
+      }
+    });
+  });
+});
+
+// Start monitoring the body container for dynamic Marzipano modal injects
+videoObserver.observe(document.body, { childList: true, subtree: true });
+
+// --- DYNAMIC VIDEO HOTSPOT CODE ---
+
+function createVideoHotspot(scene, yaw, pitch, youtubeId) {
+  var videoIcon = document.createElement('div');
+  videoIcon.classList.add('video-hotspot');
+  videoIcon.innerHTML = '🎥'; 
+
+  videoIcon.addEventListener('click', function() {
+    var modal = document.getElementById('videoModal');
+    var iframe = document.getElementById('panoVideo');
+    iframe.src = "https://www.youtube.com/embed/" + youtubeId + "?enablejsapi=1&autoplay=1";
+    modal.style.display = 'flex';
+  });
+
+  scene.hotspotContainer().createHotspot(videoIcon, { yaw: yaw, pitch: pitch });
+}
+
+function closeVideo() {
+  var modal = document.getElementById('videoModal');
+  var iframe = document.getElementById('panoVideo');
+  modal.style.display = 'none';
+  iframe.src = ''; 
+}
