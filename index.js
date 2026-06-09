@@ -214,7 +214,7 @@
 
   function updateSceneName(scene) {
     if (sceneNameElement) {
-      sceneNameElement.innerHTML = sanitize(scene.data.name);
+      sceneNameElement.innerHTML = sanitize(scene.data.name || "Transition Point");
     }
   }
 
@@ -298,7 +298,7 @@
     var tooltip = document.createElement('div');
     tooltip.classList.add('hotspot-tooltip');
     tooltip.classList.add('link-hotspot-tooltip');
-    tooltip.innerHTML = findSceneDataById(hotspot.target).name;
+    tooltip.innerHTML = findSceneDataById(hotspot.target).name || "Transition Point";
 
     wrapper.appendChild(icon);
     wrapper.appendChild(tooltip);
@@ -373,8 +373,6 @@
     }
   }
 
-  // Note: Leaving data.js with extra video fields is perfectly fine! 
-  // Marzipano will simply ignore them if index.js doesn't explicitly look for them.
   function findSceneById(id) {
     for (var i = 0; i < scenes.length; i++) {
       if (scenes[i].data.id === id) {
