@@ -439,7 +439,7 @@
   // Display the initial scene.
   switchScene(scenes[0]);
 
-})();
+)();
 // ==========================================================================
 // TRACKING ENGINE: PROGRESS METRICS & VIDEO COMPLETION HANDLER
 // ==========================================================================
