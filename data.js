@@ -234,7 +234,7 @@ var APP_DATA = {
     },
     {
       "id": "9-6-7",
-      "name": "Transition 4",
+      "name": "Transition 4", 
       "levels": [
         { "tileSize": 256, "size": 256, "fallbackOnly": true },
         { "tileSize": 512, "size": 512 }
@@ -253,7 +253,7 @@ var APP_DATA = {
     },
     {
       "id": "10-",
-      "name": "",
+      "name": "Transition 5", 
       "levels": [
         { "tileSize": 256, "size": 256, "fallbackOnly": true },
         { "tileSize": 512, "size": 512 }
