@@ -105,10 +105,18 @@
         modal.style.display = 'flex';
       });
 
-      // Place it using the yaw/pitch coordinates from this scene's data
+     // Place it using the yaw/pitch coordinates from this scene's data
       scene.hotspotContainer().createHotspot(videoIcon, { yaw: data.videoYaw, pitch: data.videoPitch });
     }
     // ----------------------------------------------
+
+    // Marzipano's original closing code (Make sure these lines look EXACTLY like this):
+    return {
+      data: data,
+      scene: scene,
+      view: view
+    };
+  }); // <-- Check this line! It must close the loop before the next section begins.
 
     // This is Marzipano's original closing code, keep it right below!
     return {
