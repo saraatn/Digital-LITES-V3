@@ -195,4 +195,205 @@
   controls.registerMethod('upElement',    new Marzipano.ElementPressControlMethod(viewUpElement,     'y', -velocity, friction), true);
   controls.registerMethod('downElement',  new Marzipano.ElementPressControlMethod(viewDownElement,   'y',  velocity, friction), true);
   controls.registerMethod('leftElement',  new Marzipano.ElementPressControlMethod(viewLeftElement,   'x', -velocity, friction), true);
-  controls.registerMethod('rightElement
+  controls.registerMethod('rightElement', new Marzipano.ElementPressControlMethod(viewRightElement,  'x',  velocity, friction), true);
+  controls.registerMethod('inElement',    new Marzipano.ElementPressControlMethod(viewInElement,  'zoom', -velocity, friction), true);
+  controls.registerMethod('outElement',   new Marzipano.ElementPressControlMethod(viewOutElement, 'zoom',  velocity, friction), true);
+
+  function sanitize(s) {
+    return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;');
+  }
+
+  function switchScene(scene) {
+    stopAutorotate();
+    scene.view.setParameters(scene.data.initialViewParameters);
+    scene.scene.switchTo();
+    startAutorotate();
+    updateSceneName(scene);
+    updateSceneList(scene);
+  }
+
+  function updateSceneName(scene) {
+    if (sceneNameElement) {
+      sceneNameElement.innerHTML = sanitize(scene.data.name);
+    }
+  }
+
+  function updateSceneList(scene) {
+    for (var i = 0; i < sceneElements.length; i++) {
+      var el = sceneElements[i];
+      if (el.getAttribute('data-id') === scene.data.id) {
+        el.classList.add('current');
+      } else {
+        el.classList.remove('current');
+      }
+    }
+  }
+
+  function showSceneList() {
+    if (sceneListElement && sceneListToggleElement) {
+      sceneListElement.classList.add('enabled');
+      sceneListToggleElement.classList.add('enabled');
+    }
+  }
+
+  function hideSceneList() {
+    if (sceneListElement && sceneListToggleElement) {
+      sceneListElement.classList.remove('enabled');
+      sceneListToggleElement.classList.remove('enabled');
+    }
+  }
+
+  function toggleSceneList() {
+    if (sceneListElement && sceneListToggleElement) {
+      sceneListElement.classList.toggle('enabled');
+      sceneListToggleElement.classList.toggle('enabled');
+    }
+  }
+
+  function startAutorotate() {
+    if (!autorotateToggleElement || !autorotateToggleElement.classList.contains('enabled')) {
+      return;
+    }
+    viewer.startMovement(autorotate);
+    viewer.setIdleMovement(3000, autorotate);
+  }
+
+  function stopAutorotate() {
+    viewer.stopMovement();
+    viewer.setIdleMovement(Infinity);
+  }
+
+  function toggleAutorotate() {
+    if (!autorotateToggleElement) return;
+    if (autorotateToggleElement.classList.contains('enabled')) {
+      autorotateToggleElement.classList.remove('enabled');
+      stopAutorotate();
+    } else {
+      autorotateToggleElement.classList.add('enabled');
+      startAutorotate();
+    }
+  }
+
+  function createLinkHotspotElement(hotspot) {
+    var wrapper = document.createElement('div');
+    wrapper.classList.add('hotspot');
+    wrapper.classList.add('link-hotspot');
+
+    var icon = document.createElement('img');
+    icon.src = 'img/link.png';
+    icon.classList.add('link-hotspot-icon');
+
+    var transformProperties = [ '-ms-transform', '-webkit-transform', 'transform' ];
+    for (var i = 0; i < transformProperties.length; i++) {
+      var property = transformProperties[i];
+      icon.style[property] = 'rotate(' + hotspot.rotation + 'rad)';
+    }
+
+    wrapper.addEventListener('click', function() {
+      switchScene(findSceneById(hotspot.target));
+    });
+
+    stopTouchAndScrollEventPropagation(wrapper);
+
+    var tooltip = document.createElement('div');
+    tooltip.classList.add('hotspot-tooltip');
+    tooltip.classList.add('link-hotspot-tooltip');
+    tooltip.innerHTML = findSceneDataById(hotspot.target).name;
+
+    wrapper.appendChild(icon);
+    wrapper.appendChild(tooltip);
+
+    return wrapper;
+  }
+
+  function createInfoHotspotElement(hotspot) {
+    var wrapper = document.createElement('div');
+    wrapper.classList.add('hotspot');
+    wrapper.classList.add('info-hotspot');
+
+    var header = document.createElement('div');
+    header.classList.add('info-hotspot-header');
+
+    var iconWrapper = document.createElement('div');
+    iconWrapper.classList.add('info-hotspot-icon-wrapper');
+    var icon = document.createElement('img');
+    icon.src = 'img/info.png';
+    icon.classList.add('info-hotspot-icon');
+    iconWrapper.appendChild(icon);
+
+    var titleWrapper = document.createElement('div');
+    titleWrapper.classList.add('info-hotspot-title-wrapper');
+    var title = document.createElement('div');
+    title.classList.add('info-hotspot-title');
+    title.innerHTML = hotspot.title;
+    titleWrapper.appendChild(title);
+
+    var closeWrapper = document.createElement('div');
+    closeWrapper.classList.add('info-hotspot-close-wrapper');
+    var closeIcon = document.createElement('img');
+    closeIcon.src = 'img/close.png';
+    closeIcon.classList.add('info-hotspot-close-icon');
+    closeWrapper.appendChild(closeIcon);
+
+    header.appendChild(iconWrapper);
+    header.appendChild(titleWrapper);
+    header.appendChild(closeWrapper);
+
+    var text = document.createElement('div');
+    text.classList.add('info-hotspot-text');
+    text.innerHTML = hotspot.text;
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(text);
+
+    var modal = document.createElement('div');
+    modal.innerHTML = wrapper.innerHTML;
+    modal.classList.add('info-hotspot-modal');
+    document.body.appendChild(modal);
+
+    var toggle = function() {
+      wrapper.classList.toggle('visible');
+      modal.classList.toggle('visible');
+    };
+
+    wrapper.querySelector('.info-hotspot-header').addEventListener('click', toggle);
+    modal.querySelector('.info-hotspot-close-wrapper').addEventListener('click', toggle);
+
+    stopTouchAndScrollEventPropagation(wrapper);
+
+    return wrapper;
+  }
+
+  function stopTouchAndScrollEventPropagation(element) {
+    var eventList = [ 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'wheel', 'mousewheel' ];
+    for (var i = 0; i < eventList.length; i++) {
+      element.addEventListener(eventList[i], function(event) {
+        event.stopPropagation();
+      });
+    }
+  }
+
+  // Note: Leaving data.js with extra video fields is perfectly fine! 
+  // Marzipano will simply ignore them if index.js doesn't explicitly look for them.
+  function findSceneById(id) {
+    for (var i = 0; i < scenes.length; i++) {
+      if (scenes[i].data.id === id) {
+        return scenes[i];
+      }
+    }
+    return null;
+  }
+
+  function findSceneDataById(id) {
+    for (var i = 0; i < data.scenes.length; i++) {
+      if (data.scenes[i].id === id) {
+        return data.scenes[i];
+      }
+    }
+    return null;
+  }
+
+  // Display the initial scene.
+  switchScene(scenes[0]);
+
+})();
