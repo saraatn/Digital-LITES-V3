@@ -21,10 +21,6 @@
   var screenfull = window.screenfull;
   var data = window.APP_DATA;
 
-  // Track visited scenes to update the progress bar
-  var visitedScenes = new Set();
-  var progressBar = document.querySelector('#progress-bar');
-
   // Grab elements from DOM.
   var panoElement = document.querySelector('#pano');
   var sceneNameElement = document.querySelector('#titleBar .sceneName');
@@ -214,7 +210,6 @@
     startAutorotate();
     updateSceneName(scene);
     updateSceneList(scene);
-    updateProgressBar(scene);
   }
 
   function updateSceneName(scene) {
@@ -231,14 +226,6 @@
       } else {
         el.classList.remove('current');
       }
-    }
-  }
-
-  function updateProgressBar(scene) {
-    if (progressBar) {
-      visitedScenes.add(scene.data.id);
-      var percentage = (visitedScenes.size / scenes.length) * 100;
-      progressBar.style.width = percentage + '%';
     }
   }
 
@@ -324,21 +311,15 @@
     wrapper.classList.add('hotspot');
     wrapper.classList.add('info-hotspot');
 
-    // Create the icon that is always visible in 3D scene space
+    var header = document.createElement('div');
+    header.classList.add('info-hotspot-header');
+
     var iconWrapper = document.createElement('div');
     iconWrapper.classList.add('info-hotspot-icon-wrapper');
     var icon = document.createElement('img');
     icon.src = 'img/info.png';
     icon.classList.add('info-hotspot-icon');
     iconWrapper.appendChild(icon);
-    wrapper.appendChild(iconWrapper);
-
-    // Create container for text content
-    var popover = document.createElement('div');
-    popover.classList.add('info-hotspot-popover');
-
-    var header = document.createElement('div');
-    header.classList.add('info-hotspot-header');
 
     var titleWrapper = document.createElement('div');
     titleWrapper.classList.add('info-hotspot-title-wrapper');
@@ -354,6 +335,7 @@
     closeIcon.classList.add('info-hotspot-close-icon');
     closeWrapper.appendChild(closeIcon);
 
+    header.appendChild(iconWrapper);
     header.appendChild(titleWrapper);
     header.appendChild(closeWrapper);
 
@@ -361,19 +343,21 @@
     text.classList.add('info-hotspot-text');
     text.innerHTML = hotspot.text;
 
-    popover.appendChild(header);
-    popover.appendChild(text);
-    wrapper.appendChild(popover);
+    wrapper.appendChild(header);
+    wrapper.appendChild(text);
 
-    // Click behavior to toggle visibility inside panorama space
-    iconWrapper.addEventListener('click', function() {
+    var modal = document.createElement('div');
+    modal.innerHTML = wrapper.innerHTML;
+    modal.classList.add('info-hotspot-modal');
+    document.body.appendChild(modal);
+
+    var toggle = function() {
       wrapper.classList.toggle('visible');
-    });
+      modal.classList.toggle('visible');
+    };
 
-    closeWrapper.addEventListener('click', function(e) {
-      e.stopPropagation();
-      wrapper.classList.remove('visible');
-    });
+    wrapper.querySelector('.info-hotspot-header').addEventListener('click', toggle);
+    modal.querySelector('.info-hotspot-close-wrapper').addEventListener('click', toggle);
 
     stopTouchAndScrollEventPropagation(wrapper);
 
